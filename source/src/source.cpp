@@ -50,6 +50,21 @@ void actualizarDatos(float (&datos)[3], float val) {
 	datos[2] += val;
 }
 
+//setw no maneja las tildes de la forma que necesitamos, por lo que hay que agregar espacios adicionales
+std::string generarEspacios(std::string str){
+	size_t len = 0;
+	size_t bytes = str.length();
+	for (char c : str) {
+		// https://datatracker.ietf.org/doc/html/rfc2044
+		// https://www.ibm.com/docs/en/aix/7.2?topic=8-utf-ucs-transformation-format
+		// descartamos todo lo que coincida con la mascara de bytes 10xxxxxx
+		// en otras palabras solo contamos caracteres iniciales de unicode
+		len += (c & 0xc0) != 0x80;
+	}
+
+	return std::string(" ", bytes - len);
+}
+
 int main() {
 	try {
 		std::ifstream archivo("salarios.txt");
@@ -83,30 +98,34 @@ int main() {
 
 		std::cout << std::fixed << std::setprecision(2);
 		std::cout
-		    << "+-----------+--------------------------+------------------+----"
-		       "------------+----------------+----------------+---+\n"
-		       "|        Id |                Apellidos |           Nombre |    "
-		       "  Sal.bruto |    Deducciones |       Sal.neto | * |\n"
-		       "+-----------+--------------------------+------------------+----"
-		       "------------+----------------+----------------+---+\n";
+		    << "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n"
+		       "|        Id |                Apellidos |           Nombre |      Sal.bruto |    Deducciones |       Sal.neto | * |\n"
+		       "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
 
+		// en windows este no alinea correctamente cuando hay tildes
 		for (auto e : empleados) {
-			std::cout << "| " << e.id << " | " << std::setw(24) << std::left
-			          << e.apellidos[0] + " " + e.apellidos[1] << " | "
-			          << std::setw(16) << e.nombre << " | " << std::right
-					  << std::setw(14) << e.salarioBruto << " | "
-					  << std::setw(14) << e.getDeducciones() << " | "
-			          << std::setw(14) << e.getSalarioNeto() << " | "
-			          << (e.getSalarioNeto() <= salarioNeto[2] ? "*" : " ")
-			          << " |\n";
+			std::string apellidos = e.apellidos[0] + " " + e.apellidos[1];
+			std::cout << "| " 
+					  << e.id                                                    	<< " | " << std::left 
+			          << std::setw(24) << apellidos << generarEspacios(apellidos)	<< " | "
+			          << std::setw(16) << e.nombre << generarEspacios(e.nombre)  	<< " | " << std::right
+					  << std::setw(14) << e.salarioBruto							<< " | "
+					  << std::setw(14) << e.getDeducciones()						<< " | "
+			          << std::setw(14) << e.getSalarioNeto()						<< " | "
+			          << (e.getSalarioNeto() <= salarioNeto[2] ? "*" : " ")			<< " |\n";
 		}
-		std::cout
-		    << "+-----------+--------------------------+------------------+----"
-		       "------------+----------------+----------------+---+\n";
+		std::cout << "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
+		std::cout << "                                                          | " << std::right 
+					<< std::setw(14) << salarioBruto[0] << " | " << std::setw(14) << deducciones[0] << " | " << std::setw(14) << salarioNeto[0] << " |\n" 
+					<< "                                                          | "
+					<< std::setw(14) << salarioBruto[2] << " | " << std::setw(14) << deducciones[2] << " | " << std::setw(14) << salarioNeto[2] << " |\n"
+					<< "                                                          | "
+					<< std::setw(14) << salarioBruto[1] << " | " << std::setw(14) << deducciones[1] << " | " << std::setw(14) << salarioNeto[1] << " |\n";
+		std::cout << "                                                          +----------------+----------------+----------------+\n";
 
-		std::cout << empleados.size();
 	} catch (std::exception e) {
 		std::cerr << "error: " << e.what() << "\n";
 		return -1;
 	}
+	std::cin.ignore();
 }
