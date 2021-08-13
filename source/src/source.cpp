@@ -11,10 +11,18 @@ struct Empleado {
 	std::string apellidos[2];
 	std::string nombre;
 	std::string fechaNacimiento;
-	int salarioBruto;
+	float salarioBruto;
+	float getDeducciones() const {
+		float deduccion = salarioBruto * 0.09;
+		if (salarioBruto > 950000) {
+			deduccion += (salarioBruto - 950000) * 0.05;
+		}
+		return deduccion;
+	}
+	float getSalarioNeto() const { return salarioBruto - getDeducciones(); }
 	static Empleado fromCSV(std::string linea) {
+		std::stringstream s(linea);
 		Empleado e;
-		std::stringstream s;
 		s >> e.id;
 		s >> e.apellidos[0] >> e.apellidos[1];
 		s >> e.nombre;
@@ -27,18 +35,68 @@ struct Empleado {
 	};
 };
 
+void actualizarDatos(float (&datos)[3], float val) {
+	// menor
+	if (datos[0] > val) {
+		datos[0] = val;
+	}
+	// mayor
+	if (datos[1] < val) {
+		datos[1] = val;
+	}
+	// acumulado (promedio)
+	datos[2] += val;
+}
+
 int main() {
-	std::ifstream archivo("salarios.txt");
-	if (archivo) {
+	try {
+		std::ifstream archivo("salarios.txt");
+		if (!archivo) {
+			throw std::runtime_error("no se pudo abrir el archivo");
+		}
 		std::vector<Empleado> empleados;
-		while (archivo.eof()) {
+		// min, max y promedio
+		float salarioBruto[3] = {0, 0, 0};
+		float deducciones[3] = {0, 0, 0};
+		float salarioNeto[3] = {0, 0, 0};
+
+		while (!archivo.eof()) {
 			std::string linea;
 			std::getline(archivo, linea);
-			empleados.push_back(Empleado::fromCSV(linea));
+			if (linea.empty()) {
+				break;
+			}
+			Empleado e = Empleado::fromCSV(linea);
+			actualizarDatos(salarioBruto, e.salarioBruto);
+			actualizarDatos(deducciones, e.getDeducciones());
+			actualizarDatos(salarioNeto, e.getSalarioNeto());
+			empleados.push_back(e);
 		}
+		if (empleados.size() > 0) {
+			salarioBruto[2] = salarioBruto[2] / empleados.size();
+			deducciones[2] = deducciones[2] / empleados.size();
+			salarioNeto[2] = salarioNeto[2] / empleados.size();
+		}
+
+		std::cout
+		    << "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n"
+		       "|        Id |                Apellidos |           Nombre |      Sal.bruto |    Deducciones |       Sal.neto | * |\n"
+		       "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
+
+		for (auto e : empleados) {
+			std::cout << "| " << e.id << " | " << e.apellidos[0] << " "
+			          << e.apellidos[1] << " | " << e.nombre << " | "
+			          << e.salarioBruto << " | " << e.getDeducciones() << " | "
+			          << e.getSalarioNeto() << " | "
+			          << (e.getSalarioNeto() <= salarioNeto[2] ? "*" : " ")
+			          << "|\n";
+		}
+		std::cout
+		    << "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
+
 		std::cout << empleados.size();
-	} else {
-		std::cerr << "error: no se pudo abrir el archivo\n";
+	} catch (std::exception e) {
+		std::cerr << "error: " << e.what() << "\n";
 		return -1;
 	}
 }
