@@ -8,15 +8,15 @@
 #include <vector>
 
 struct Empleado {
-	int id;
+	int id = -1;
 	std::string apellidos[2];
 	std::string nombre;
 	std::string fechaNacimiento;
-	float salarioBruto;
+	float salarioBruto = 0;
 	float getDeducciones() const {
-		float deduccion = salarioBruto * 0.09;
+		float deduccion = float(salarioBruto * 0.09);
 		if (salarioBruto > 950000) {
-			deduccion += (salarioBruto - 950000) * 0.05;
+			deduccion += float((salarioBruto - (float)950000) * 0.05);
 		}
 		return deduccion;
 	}
