@@ -1,5 +1,6 @@
 #include <exception>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -25,7 +26,8 @@ struct Empleado {
 		Empleado e;
 		s >> e.id;
 		s >> e.apellidos[0] >> e.apellidos[1];
-		s >> e.nombre;
+		s.ignore();
+		std::getline(s, e.nombre, '\t');
 		s >> e.fechaNacimiento;
 		s >> e.salarioBruto;
 		if (!s) {
@@ -77,22 +79,30 @@ int main() {
 			deducciones[2] = deducciones[2] / empleados.size();
 			salarioNeto[2] = salarioNeto[2] / empleados.size();
 		}
+		
 
+		std::cout << std::fixed << std::setprecision(2);
 		std::cout
-		    << "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n"
-		       "|        Id |                Apellidos |           Nombre |      Sal.bruto |    Deducciones |       Sal.neto | * |\n"
-		       "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
+		    << "+-----------+--------------------------+------------------+----"
+		       "------------+----------------+----------------+---+\n"
+		       "|        Id |                Apellidos |           Nombre |    "
+		       "  Sal.bruto |    Deducciones |       Sal.neto | * |\n"
+		       "+-----------+--------------------------+------------------+----"
+		       "------------+----------------+----------------+---+\n";
 
 		for (auto e : empleados) {
-			std::cout << "| " << e.id << " | " << e.apellidos[0] << " "
-			          << e.apellidos[1] << " | " << e.nombre << " | "
-			          << e.salarioBruto << " | " << e.getDeducciones() << " | "
-			          << e.getSalarioNeto() << " | "
+			std::cout << "| " << e.id << " | " << std::setw(24) << std::left
+			          << e.apellidos[0] + " " + e.apellidos[1] << " | "
+			          << std::setw(16) << e.nombre << " | " << std::right
+					  << std::setw(14) << e.salarioBruto << " | "
+					  << std::setw(14) << e.getDeducciones() << " | "
+			          << std::setw(14) << e.getSalarioNeto() << " | "
 			          << (e.getSalarioNeto() <= salarioNeto[2] ? "*" : " ")
-			          << "|\n";
+			          << " |\n";
 		}
 		std::cout
-		    << "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
+		    << "+-----------+--------------------------+------------------+----"
+		       "------------+----------------+----------------+---+\n";
 
 		std::cout << empleados.size();
 	} catch (std::exception e) {
