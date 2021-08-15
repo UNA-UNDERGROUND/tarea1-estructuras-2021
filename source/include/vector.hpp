@@ -3,7 +3,6 @@
 #include <initializer_list>
 #include <stdexcept>
 #include <type_traits>
-#include <vcruntime.h>
 
 template <typename T> class Vector {
 	T *arreglo = nullptr;
