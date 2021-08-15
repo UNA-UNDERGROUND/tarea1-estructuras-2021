@@ -40,7 +40,7 @@ struct Empleado {
 
 void actualizarDatos(float (&datos)[3], float val) {
 	// menor
-	if (datos[0] > val) {
+	if (datos[0] > val || datos[0] == -1) {
 		datos[0] = val;
 	}
 	// mayor
@@ -75,9 +75,9 @@ int main() {
 		}
 		std::vector<Empleado> empleados;
 		// min, max y promedio
-		float salarioBruto[3] = {0, 0, 0};
-		float deducciones[3] = {0, 0, 0};
-		float salarioNeto[3] = {0, 0, 0};
+		float salarioBruto[3] = {-1, 0, 0};
+		float deducciones[3]  = {-1, 0, 0};
+		float salarioNeto[3]  = {-1, 0, 0};
 
 		while (!archivo.eof()) {
 			std::string linea;
@@ -96,6 +96,14 @@ int main() {
 			deducciones[2] = deducciones[2] / empleados.size();
 			salarioNeto[2] = salarioNeto[2] / empleados.size();
 		}
+		// sin asignar
+		if (salarioBruto[0] == -1) {
+			salarioBruto[0] = 0;
+			deducciones[0]  = 0;
+			salarioNeto[0]  = 0;
+		}
+
+
 		std::sort(empleados.begin(), empleados.end(),
 		          [](const Empleado &e1, const Empleado &e2) {
 			          return (e1.apellidos[0] != e2.apellidos[0])
