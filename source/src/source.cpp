@@ -1,12 +1,10 @@
-#include <algorithm>
-#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <vector>
+#include <vector.hpp>
 
 struct Empleado {
 	int id = -1;
@@ -73,7 +71,7 @@ int main() {
 		if (!archivo) {
 			throw std::runtime_error("no se pudo abrir el archivo");
 		}
-		std::vector<Empleado> empleados;
+		Vector<Empleado> empleados;
 		// min, max y promedio
 		float salarioBruto[3] = {-1, 0, 0};
 		float deducciones[3]  = {-1, 0, 0};
@@ -103,13 +101,19 @@ int main() {
 			salarioNeto[0]  = 0;
 		}
 
+		for (size_t i = 0; i < empleados.size() - 1; i++) {
+			for (size_t j = 0; j < empleados.size() - i - 1; j++) {
+				Empleado &e1 = empleados[j];
+				Empleado &e2 = empleados[j + 1];
+				bool menor = (e1.apellidos[0] != e2.apellidos[0])
+				                 ? e1.apellidos[0] < e2.apellidos[0]
+				                 : e1.apellidos[1] < e2.apellidos[1];
+				if (!menor) {
+					std::swap(empleados[j], empleados[j + 1]);
+				}
+			}
+		}
 
-		std::sort(empleados.begin(), empleados.end(),
-		          [](const Empleado &e1, const Empleado &e2) {
-			          return (e1.apellidos[0] != e2.apellidos[0])
-			                     ? e1.apellidos[0] < e2.apellidos[0]
-			                     : e1.apellidos[1] < e2.apellidos[1];
-		          });
 
 		std::cout << std::fixed << std::setprecision(2);
 		std::cout
