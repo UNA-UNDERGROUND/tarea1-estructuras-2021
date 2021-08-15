@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstddef>
 #include <exception>
 #include <fstream>
 #include <iomanip>
@@ -53,7 +54,7 @@ void actualizarDatos(float (&datos)[3], float val) {
 
 // setw no maneja las tildes de la forma que necesitamos, por lo que hay que
 // agregar espacios adicionales
-std::string generarEspacios(std::string str) {
+std::string generarEspacios(std::string str, std::size_t width) {
 	size_t len = 0;
 	size_t bytes = str.length();
 	for (char c : str) {
@@ -63,8 +64,9 @@ std::string generarEspacios(std::string str) {
 		// en otras palabras solo contamos caracteres iniciales de unicode
 		len += (c & 0xc0) != 0x80;
 	}
-
-	return std::string(" ", bytes - len);
+	std::size_t offset = len >= width ? 0: width - len;
+	std::size_t spaces = (bytes-len) + offset; 
+	return std::string("=", bytes - len);
 }
 
 int main() {
@@ -110,17 +112,27 @@ int main() {
 		       "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
 
 		// en windows este no alinea correctamente cuando hay tildes
+		std::stringstream s;
+		s << std::fixed << std::setprecision(2);
 		for (auto e : empleados) {
 			std::string apellidos = e.apellidos[0] + " " + e.apellidos[1];
-			std::cout << "| " << e.id << " | " << std::left << std::setw(24)
-			          << apellidos << generarEspacios(apellidos) << " | "
-			          << std::setw(16) << e.nombre << generarEspacios(e.nombre)
-			          << " | " << std::right << std::setw(14) << e.salarioBruto
-			          << " | " << std::setw(14) << e.getDeducciones() << " | "
-			          << std::setw(14) << e.getSalarioNeto() << " | "
-			          << (e.getSalarioNeto() <= salarioNeto[2] ? "*" : " ")
-			          << " |\n";
+			apellidos = apellidos + generarEspacios(apellidos, 24);
+			std::string nombre = e.nombre + generarEspacios(e.nombre, 16);
+			std::stringstream ss;
+			ss << apellidos << generarEspacios(apellidos, 16) << " | ";
+			std::string tst = ss.str();
+			s 	<< "| " << std::setfill('-')
+						<< e.id 												<< " | " << std::left << std::setw(24)
+			          	<< apellidos << generarEspacios(apellidos, 24) 				<< " | "
+			          	<< std::setw(16) << nombre << generarEspacios(nombre, 16) 	<< " | " << std::right 
+					  	<< std::setw(14) << e.salarioBruto 						<< " | "
+					  	<< std::setw(14) << e.getDeducciones() 					<< " | "
+			          	<< std::setw(14) << e.getSalarioNeto() 					<< " | "
+			          	<< (e.getSalarioNeto() <= salarioNeto[2] ? "*" : " ")
+			          	<< " |\n";
+			
 		}
+		std::cout << s.str();
 		std::cout
 		    << "+-----------+--------------------------+------------------+----------------+----------------+----------------+---+\n";
 		std::cout
@@ -139,9 +151,9 @@ int main() {
 		std::cout << "                                                         "
 		             " +----------------+----------------+----------------+\n";
 
-	} catch (std::exception e) {
+	} catch (const std::exception& e) {
 		std::cerr << "error: " << e.what() << "\n";
 		return -1;
 	}
-	std::cin.ignore();
+	//std::cin.ignore();
 }
