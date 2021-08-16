@@ -13,28 +13,33 @@ INCLUDE_DIR=$(SOURCES_ROOT)/include
 INCLUDE_SRC=$(INCLUDE_DIR)/vector.hpp
 SOURCES_SRC=$(SOURCES_DIR)/source.cpp
 INC_PARAMS=$(INCLUDE_DIR:%=-I%)
-BIN_OUTPUT=build-out/bin/
+BUILD_OUT_ROOT=build-out
+SOURCE_OUT_ROOT=$(BUILD_OUT_ROOT)/build
+#si quisieramos podemos especificar rutas separadas para los assets
+BIN_OUTPUT=$(BUILD_OUT_ROOT)/$(PROJECT)/
+ASSETS_OUTPUT=$(BUILD_OUT_ROOT)/$(PROJECT)/
 
-all: program
+all: configure program post-setup
 
-program: configure
+program:
 	$(CXX) -o $(BIN_OUTPUT)$(PROJECT) $(SOURCES_SRC) $(CPPFLAGS) $(INC_PARAMS)
 
 configure:
 	@echo configuring project
-	@mkdir -p build-out/build
-	@mkdir -p build-out/bin
+	@mkdir -p $(SOURCE_OUT_ROOT)
+	@mkdir -p $(BIN_OUTPUT)
+	@mkdir -p $(ASSETS_OUTPUT)
 
-check: post_setup
+check: post-setup
 	cd $(BIN_OUTPUT) && ./$(PROJECT)
 
-post_setup:
+post-setup:
 	chmod +x ./$(BIN_OUTPUT)$(PROJECT)
-	$(CP_DIR) assets/. $(BIN_OUTPUT)
+	$(CP_DIR) assets/. $(ASSETS_OUTPUT)
 
 clean:
 	@echo cleaning directory
-	@$(RM) -rf build-out
+	@$(RM) -rf $(BUILD_OUT_ROOT)
 
 clean-cmake:
 	@echo cleaning cmake directory
