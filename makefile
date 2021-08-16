@@ -25,7 +25,7 @@ configure:
 	@mkdir -p build-out/build
 	@mkdir -p build-out/bin
 
-test: post_setup
+check: post_setup
 	cd $(BIN_OUTPUT) && ./$(PROJECT)
 
 post_setup:
