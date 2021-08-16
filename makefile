@@ -36,15 +36,15 @@ clean:
 	@echo cleaning directory
 	@$(RM) -rf build-out
 
-clean_cmake:
+clean-cmake:
 	@echo cleaning cmake directory
 	@$(RM) -rf build
 	@$(RM) -rf out
 
-clean_cache:
+clean-cache:
 	@echo cleaning cache
 	@$(RM) -rf .cache
 	@$(RM) -rf .vs
 
-clean_all: clean clean_cmake clean_cache
+clean-all: clean clean-cmake clean-cache
 
